@@ -21,28 +21,28 @@ import java.util.HashMap;
  * @date 2018/9/4
  */
 public class TransactionBlockChain {
-    public static ArrayList<TransactionBlock> blockchain = new ArrayList<TransactionBlock>();
+    private static ArrayList<TransactionBlock> blockchain = new ArrayList<>();
 
     /**
      * 未使用的交易输出集合（UTXOs）
      */
-    public static HashMap<String, TransactionOutput> UTXOs = new HashMap<String, TransactionOutput>();
+    public static HashMap<String, TransactionOutput> UTXOs = new HashMap<>();
 
     /**
      * 挖矿复杂度
      */
-    public static int difficulty = 3;
+    private static int difficulty = 3;
 
     /**
      * 最小交易资金金额
      */
     public static float minimumTransaction = 0.1f;
 
-    public static Wallet walletA;
+    private static Wallet walletA;
 
-    public static Wallet walletB;
+    private static Wallet walletB;
 
-    public static Transaction genesisTransaction;
+    private static Transaction genesisTransaction;
 
 
     /**
@@ -51,7 +51,7 @@ public class TransactionBlockChain {
      * @param reciepient 收账的钱包地址
      * @param value      转账的金额
      */
-    public static Transaction newCoinBaseTX(PublicKey reciepient, float value) {
+    private static Transaction newCoinBaseTX(PublicKey reciepient, float value) {
         Wallet coinbase = new Wallet();
         //生成创世交易数据
         genesisTransaction = new Transaction(coinbase.publicKey, reciepient, value, null);
@@ -106,7 +106,6 @@ public class TransactionBlockChain {
         block3.addTransaction(walletB.sendFunds(walletA.publicKey, 20));
         System.out.println("WalletA的钱包余额: " + walletA.getBalance());
         System.out.println("WalletB的钱包余额: " + walletB.getBalance() + "\n");
-
         System.out.println("\n检查链的完整性: " + isChainValid());
     }
 
@@ -114,12 +113,12 @@ public class TransactionBlockChain {
      * 检查链的完整性
      * 帐户交易中的“更新的链”的有效性检查
      */
-    public static Boolean isChainValid() {
+    private static Boolean isChainValid() {
         TransactionBlock currentBlock;
         TransactionBlock previousBlock;
         String hashTarget = new String(new char[difficulty]).replace('\0', '0');
         //a temporary working list of unspent transactions at a given block state.
-        HashMap<String, TransactionOutput> tempUTXOs = new HashMap<String, TransactionOutput>();
+        HashMap<String, TransactionOutput> tempUTXOs = new HashMap<>();
         tempUTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0));
 
         //loop through blockchain to check hashes:
@@ -189,7 +188,7 @@ public class TransactionBlockChain {
     /**
      * 添加区块
      */
-    public static void addBlock(TransactionBlock newBlock) {
+    private static void addBlock(TransactionBlock newBlock) {
         //通过矿工们来做工作量证明（POW）来挖掘并验证新的区块
         newBlock.ProofOfWork(difficulty);
         //添加区块
