@@ -1,6 +1,5 @@
 package entity.transcation;
 
-import test.TransactionBlockChain;
 import util.EncryptTool;
 import util.StringTool;
 

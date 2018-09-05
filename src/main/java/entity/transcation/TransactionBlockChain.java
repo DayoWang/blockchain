@@ -1,10 +1,7 @@
-package test;
+package entity.transcation;
 
 import entity.Wallet;
 import entity.block.TransactionBlock;
-import entity.transcation.Transaction;
-import entity.transcation.TransactionInput;
-import entity.transcation.TransactionOutput;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.PublicKey;

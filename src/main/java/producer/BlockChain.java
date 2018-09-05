@@ -1,4 +1,4 @@
-package test;
+package producer;
 
 import entity.block.Block;
 import util.StringTool;
@@ -12,12 +12,12 @@ import java.util.ArrayList;
  * @date 2018/9/4
  */
 public class BlockChain {
-    public static ArrayList<Block> blocklist = new ArrayList<Block>();
+    private static ArrayList<Block> blocklist = new ArrayList<>();
 
     /**
      * 挖矿复杂度
      */
-    public static int difficulty = 20;
+    private static int difficulty = 20;
 
     /**
      * 生成创世块
@@ -53,7 +53,7 @@ public class BlockChain {
     /**
      * 检查链的完整性
      */
-    public static Boolean isChainValid() {
+    private static Boolean isChainValid() {
         Block currentBlock;
         Block previousBlock;
 

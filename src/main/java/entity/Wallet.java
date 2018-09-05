@@ -3,7 +3,7 @@ package entity;
 import entity.transcation.Transaction;
 import entity.transcation.TransactionInput;
 import entity.transcation.TransactionOutput;
-import test.TransactionBlockChain;
+import entity.transcation.TransactionBlockChain;
 
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
