@@ -1,5 +1,5 @@
-import me.wgy.model.Block;
-import me.wgy.model.Blockchain;
+import me.wgy.block.model.Block;
+import me.wgy.block.model.Blockchain;
 
 /**
  * 区块链测试
@@ -16,7 +16,7 @@ public class BlockchainTest {
     blockchain.addBlock("Send 2 BTC to Dayo Wang");
 
     for (Block block : blockchain.getBlockList()) {
-      System.out.println("Prev. hash: " + block.getPrevBlockHash());
+      System.out.println("Prev Block Hash: " + block.getPrevBlockHash());
       System.out.println("Data: " + block.getData());
       System.out.println("Hash: " + block.getHash());
       System.out.println();

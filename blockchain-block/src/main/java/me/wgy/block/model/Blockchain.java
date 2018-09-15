@@ -1,4 +1,4 @@
-package me.wgy.model;
+package me.wgy.block.model;
 
 import java.util.LinkedList;
 import java.util.List;
