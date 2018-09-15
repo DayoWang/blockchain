@@ -1,11 +1,12 @@
-package util;
+package me.wgy.util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
  * 用SHA256计算Hash值
  *
- * @author Dayo
+ * @author wgy
  * @date 2018/9/4
  */
 public class EncryptTool {
@@ -18,12 +19,12 @@ public class EncryptTool {
             //通过MessageDigest来使用SHA256加密算法
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             //对输入input使用 sha256 算法
-            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
 
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
 
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
+            for (byte aHash : hash) {
+                String hex = Integer.toHexString(0xff & aHash);
                 if (hex.length() == 1) {
                     hexString.append('0');
                 } else {
