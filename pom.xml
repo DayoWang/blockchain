@@ -25,6 +25,7 @@
     <module>blockchain-transaction</module>
     <module>blockchain-common</module>
     <module>blockchain-wallet</module>
+    <module>blockchain-cli</module>
   </modules>
 
   <dependencies>

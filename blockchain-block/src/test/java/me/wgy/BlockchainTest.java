@@ -1,3 +1,5 @@
+package me.wgy;
+
 import me.wgy.block.consensus.ProofOfWork;
 import me.wgy.block.model.Block;
 import me.wgy.block.model.Blockchain;
