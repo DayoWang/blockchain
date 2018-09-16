@@ -1,10 +1,11 @@
 package me.wgy.block.consensus;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import me.wgy.block.model.Block;
-import me.wgy.util.ByteUtils;
+import me.wgy.utils.ByteUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,15 +49,15 @@ public class ProofOfWork {
   public PowResult run() {
     long nonce = 0;
     String shaHex = "";
-    System.out.printf("Mining the block containing：%s \n", this.getBlock().getData());
+    System.out.printf("Mining the block containing：%s %n", this.getBlock().getData());
     long startTime = System.currentTimeMillis();
     while (nonce < Long.MAX_VALUE) {
       byte[] data = this.prepareData(nonce);
       shaHex = DigestUtils.sha256Hex(data);
       if (new BigInteger(shaHex, 16).compareTo(this.target) == -1) {
-        System.out.printf("Elapsed Time: %s seconds \n",
+        System.out.printf("Elapsed Time: %s seconds %n",
             (float) (System.currentTimeMillis() - startTime) / 1000);
-        System.out.printf("correct hash Hex: %s \n\n", shaHex);
+        System.out.printf("correct hash Hex: %s %n%n", shaHex);
         break;
       } else {
         nonce++;
@@ -86,7 +87,7 @@ public class ProofOfWork {
 
     return ByteUtils.merge(
         prevBlockHashBytes,
-        this.getBlock().getData().getBytes(),
+        this.getBlock().getData().getBytes(StandardCharsets.UTF_8),
         ByteUtils.toBytes(this.getBlock().getTimeStamp()),
         ByteUtils.toBytes(TARGET_BITS),
         ByteUtils.toBytes(nonce)

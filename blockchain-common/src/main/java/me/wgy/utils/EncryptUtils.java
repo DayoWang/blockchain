@@ -1,4 +1,4 @@
-package me.wgy.util;
+package me.wgy.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -9,7 +9,7 @@ import java.security.MessageDigest;
  * @author wgy
  * @date 2018/9/4
  */
-public class EncryptTool {
+public class EncryptUtils {
     /**
      * 计算Hash值
      * 将传入参数转换成哈希值返回

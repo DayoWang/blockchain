@@ -25,5 +25,13 @@
       <artifactId>commons-codec</artifactId>
       <version>1.11</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+    <dependency>
+      <groupId>com.esotericsoftware</groupId>
+      <artifactId>kryo</artifactId>
+      <version>4.0.2</version>
+    </dependency>
+
   </dependencies>
 </project>

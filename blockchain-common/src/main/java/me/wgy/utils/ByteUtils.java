@@ -1,8 +1,9 @@
-package me.wgy.util;
+package me.wgy.utils;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.stream.Stream;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -12,6 +13,8 @@ import org.apache.commons.lang3.ArrayUtils;
  * @date 2018/9/14
  */
 public class ByteUtils {
+
+  public static final String ZERO_HASH = Hex.encodeHexString(new byte[32]);
 
   /**
    * 将多个字节数组合并成一个字节数组

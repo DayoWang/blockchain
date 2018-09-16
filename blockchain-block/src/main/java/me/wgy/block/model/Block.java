@@ -59,6 +59,16 @@ public class Block {
     block.setHash(powResult.getHash());
     block.setNonce(powResult.getNonce());
     return block;
+  }
 
+  @Override
+  public String toString() {
+    return "Block{" +
+        "hash='" + hash + '\'' +
+        ", prevBlockHash='" + prevBlockHash + '\'' +
+        ", data='" + data + '\'' +
+        ", timeStamp=" + timeStamp +
+        ", nonce=" + nonce +
+        '}';
   }
 }

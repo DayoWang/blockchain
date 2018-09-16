@@ -1,3 +1,4 @@
+import me.wgy.block.consensus.ProofOfWork;
 import me.wgy.block.model.Block;
 import me.wgy.block.model.Blockchain;
 
@@ -11,15 +12,25 @@ public class BlockchainTest {
 
   public static void main(String[] args) {
 
-    Blockchain blockchain = Blockchain.createBlockchain();
-    blockchain.addBlock("Send 1 BTC to WGY");
-    blockchain.addBlock("Send 2 BTC to Dayo Wang");
+    try {
+      Blockchain blockchain = Blockchain.createBlockchain();
 
-    for (Block block : blockchain.getBlockList()) {
-      System.out.println("Prev Block Hash: " + block.getPrevBlockHash());
-      System.out.println("Data: " + block.getData());
-      System.out.println("Hash: " + block.getHash());
-      System.out.println();
+      blockchain.addBlock("Send 1.0 BTC to Dayo Wang");
+      blockchain.addBlock("Send 2.0 more BTC to Dayo Wang");
+      blockchain.addBlock("Send 3.0 more BTC to Dayo Wang");
+
+      for (Blockchain.BlockchainIterator iterator = blockchain.getBlockchainIterator();
+          iterator.hashNext(); ) {
+        Block block = iterator.next();
+
+        if (block != null) {
+          boolean validate = ProofOfWork.createProofOfWork(block).validate();
+          System.out.println(block.toString() + ", validate = " + validate);
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

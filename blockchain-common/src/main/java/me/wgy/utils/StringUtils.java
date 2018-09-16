@@ -1,6 +1,7 @@
-package me.wgy.util;
+package me.wgy.utils;
 
 import com.google.gson.GsonBuilder;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -13,7 +14,7 @@ import java.util.Base64;
  * @author wgy
  * @date 2018/9/4
  */
-public class StringTool {
+public class StringUtils {
 
   /**
    * 通过GSON库转换成JSON
@@ -42,7 +43,7 @@ public class StringTool {
       // 数字签名算法ECDSA
       dsa = Signature.getInstance("ECDSA", "BC");
       dsa.initSign(privateKey);
-      byte[] strByte = input.getBytes();
+      byte[] strByte = input.getBytes(StandardCharsets.UTF_8);
       dsa.update(strByte);
       output = dsa.sign();
     } catch (Exception e) {
@@ -58,7 +59,7 @@ public class StringTool {
     try {
       Signature ecdsaVerify = Signature.getInstance("ECDSA", "BC");
       ecdsaVerify.initVerify(publicKey);
-      ecdsaVerify.update(data.getBytes());
+      ecdsaVerify.update(data.getBytes(StandardCharsets.UTF_8));
       return ecdsaVerify.verify(signature);
     } catch (Exception e) {
       throw new RuntimeException(e);
