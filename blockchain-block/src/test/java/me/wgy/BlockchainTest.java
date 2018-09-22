@@ -15,11 +15,7 @@ public class BlockchainTest {
   public static void main(String[] args) {
 
     try {
-      Blockchain blockchain = Blockchain.createBlockchain();
-
-      blockchain.addBlock("Send 1.0 BTC to Dayo Wang");
-      blockchain.addBlock("Send 2.0 more BTC to Dayo Wang");
-      blockchain.addBlock("Send 3.0 more BTC to Dayo Wang");
+      Blockchain blockchain = Blockchain.createBlockchain("wgy");
 
       for (Blockchain.BlockchainIterator iterator = blockchain.getBlockchainIterator();
           iterator.hashNext(); ) {

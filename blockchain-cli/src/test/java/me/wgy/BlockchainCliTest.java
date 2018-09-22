@@ -12,8 +12,7 @@ public class BlockchainCliTest {
 
   public static void main(String[] args) {
     try {
-      //String argss[] = {"-addblock", "Send 2.0 BTC to Dayo Wang Cli"};
-      String argss[] = {"-print"};
+      String[] argss = {"send", "-from", "wgy", "-to", "wgy1", "-amount", "6"};
       CliService cli = new CliService(argss);
       cli.parse();
     } catch (Exception e) {

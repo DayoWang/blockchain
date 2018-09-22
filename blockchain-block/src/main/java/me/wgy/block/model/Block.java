@@ -4,9 +4,12 @@ import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import me.wgy.block.consensus.PowResult;
 import me.wgy.block.consensus.ProofOfWork;
-import org.apache.commons.codec.binary.Hex;
+import me.wgy.transaction.model.Transaction;
+import me.wgy.utils.ByteUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * 区块
@@ -17,9 +20,8 @@ import org.apache.commons.codec.binary.Hex;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Block {
-
-  private static final String ZERO_HASH = Hex.encodeHexString(new byte[32]);
 
   /**
    * 区块hash值
@@ -30,9 +32,9 @@ public class Block {
    */
   private String prevBlockHash;
   /**
-   * 区块数据
+   * 交易信息
    */
-  private String data;
+  private Transaction[] transactions;
   /**
    * 区块创建时间(单位:秒)
    */
@@ -45,15 +47,15 @@ public class Block {
   /**
    * <p> 创建创世区块 </p>
    */
-  public static Block createGenesisBlock() {
-    return Block.createBlock(ZERO_HASH, "Genesis Block");
+  public static Block createGenesisBlock(Transaction coinbase) {
+    return Block.createBlock(ByteUtils.ZERO_HASH, new Transaction[]{coinbase});
   }
 
   /**
    * <p> 创建新区块 </p>
    */
-  public static Block createBlock(String prevBlockHash, String data) {
-    Block block = new Block("", prevBlockHash, data, Instant.now().getEpochSecond(), 0);
+  public static Block createBlock(String previousHash, Transaction[] transactions) {
+    Block block = new Block("", previousHash, transactions, Instant.now().getEpochSecond(), 0);
     ProofOfWork pow = ProofOfWork.createProofOfWork(block);
     PowResult powResult = pow.run();
     block.setHash(powResult.getHash());
@@ -61,14 +63,14 @@ public class Block {
     return block;
   }
 
-  @Override
-  public String toString() {
-    return "Block{" +
-        "hash='" + hash + '\'' +
-        ", prevBlockHash='" + prevBlockHash + '\'' +
-        ", data='" + data + '\'' +
-        ", timeStamp=" + timeStamp +
-        ", nonce=" + nonce +
-        '}';
+  /**
+   * 对区块中的交易信息进行Hash计算
+   */
+  public byte[] hashTransaction() {
+    byte[][] txIdArrays = new byte[this.getTransactions().length][];
+    for (int i = 0; i < this.getTransactions().length; i++) {
+      txIdArrays[i] = this.getTransactions()[i].getTxId();
+    }
+    return DigestUtils.sha256(ByteUtils.merge(txIdArrays));
   }
 }
