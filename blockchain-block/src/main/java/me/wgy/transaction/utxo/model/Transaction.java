@@ -1,4 +1,4 @@
-package me.wgy.transaction.model;
+package me.wgy.transaction.utxo.model;
 
 import java.util.Iterator;
 import java.util.Map;

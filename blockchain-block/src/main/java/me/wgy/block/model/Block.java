@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import me.wgy.block.consensus.PowResult;
 import me.wgy.block.consensus.ProofOfWork;
-import me.wgy.transaction.model.Transaction;
+import me.wgy.transaction.utxo.model.Transaction;
 import me.wgy.utils.ByteUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 

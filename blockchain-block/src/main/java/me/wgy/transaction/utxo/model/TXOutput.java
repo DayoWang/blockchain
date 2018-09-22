@@ -1,4 +1,4 @@
-package me.wgy.transaction.model;
+package me.wgy.transaction.utxo.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
