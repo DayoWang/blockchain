@@ -12,7 +12,7 @@ public class BlockchainCliTest {
 
   public static void main(String[] args) {
     try {
-      String[] argss = {"send", "-from", "wgy", "-to", "wgy1", "-amount", "6"};
+      String[] argss = {"createwallet"};
       CliService cli = new CliService(argss);
       cli.parse();
     } catch (Exception e) {

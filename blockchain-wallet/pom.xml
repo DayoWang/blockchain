@@ -11,5 +11,14 @@
 
   <artifactId>blockchain-wallet</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>me.wgy</groupId>
+      <artifactId>blockchain-common</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+  </dependencies>
+
 
 </project>

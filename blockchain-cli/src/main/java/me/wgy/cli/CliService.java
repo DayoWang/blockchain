@@ -1,11 +1,16 @@
 package me.wgy.cli;
 
+import java.util.Arrays;
+import java.util.Set;
 import me.wgy.block.consensus.ProofOfWork;
 import me.wgy.block.model.Block;
 import me.wgy.block.model.Blockchain;
 import me.wgy.block.store.RocksDBStore;
+import me.wgy.model.Wallet;
 import me.wgy.transaction.utxo.model.TXOutput;
 import me.wgy.transaction.utxo.model.Transaction;
+import me.wgy.utils.Base58Check;
+import me.wgy.utils.WalletUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -27,9 +32,6 @@ public class CliService {
 
   public CliService(String[] args) {
     this.args = args;
-    /*options.addOption("h", "help", false, "show help");
-    options.addOption("add", "addblock", true, "add a block to the blockchain");
-    options.addOption("print", "printchain", false, "print all the blocks of the blockchain");*/
 
     Option helpCmd = Option.builder("h").desc("show help").build();
     options.addOption(helpCmd);
@@ -79,6 +81,12 @@ public class CliService {
           }
           this.send(sendFrom, sendTo, Integer.valueOf(sendAmount));
           break;
+        case "createwallet":
+          this.createWallet();
+          break;
+        case "printaddresses":
+          this.printAddresses();
+          break;
         case "printchain":
           this.printChain();
           break;
@@ -94,7 +102,6 @@ public class CliService {
       RocksDBStore.getInstance().closeDB();
     }
   }
-
 
   /**
    * 验证入参
@@ -114,13 +121,45 @@ public class CliService {
   }
 
   /**
+   * 创建钱包
+   */
+  private void createWallet() throws Exception {
+    Wallet wallet = WalletUtils.getInstance().createWallet();
+    System.out.println("wallet address : " + wallet.getAddress());
+  }
+
+  /**
+   * 打印钱包地址
+   */
+  private void printAddresses() throws Exception {
+    Set<String> addresses = WalletUtils.getInstance().getAddresses();
+    if (addresses == null || addresses.isEmpty()) {
+      System.out.println("There isn't address");
+      return;
+    }
+    for (String address : addresses) {
+      System.out.println("Wallet address: " + address);
+    }
+  }
+
+  /**
    * 查询钱包余额
    *
    * @param address 钱包地址
    */
   private void getBalance(String address) throws Exception {
+    // 检查钱包地址是否合法
+    try {
+      Base58Check.base58ToBytes(address);
+    } catch (Exception e) {
+      throw new Exception("ERROR: invalid wallet address");
+    }
     Blockchain blockchain = Blockchain.createBlockchain(address);
-    TXOutput[] txOutputs = blockchain.findUTXO(address);
+    // 得到公钥Hash值
+    byte[] versionedPayload = Base58Check.base58ToBytes(address);
+    byte[] pubKeyHash = Arrays.copyOfRange(versionedPayload, 1, versionedPayload.length);
+
+    TXOutput[] txOutputs = blockchain.findUTXO(pubKeyHash);
     int balance = 0;
     if (txOutputs != null && txOutputs.length > 0) {
       for (TXOutput txOutput : txOutputs) {
@@ -134,8 +173,23 @@ public class CliService {
    * 转账
    */
   private void send(String from, String to, int amount) throws Exception {
+    // 检查钱包地址是否合法
+    try {
+      Base58Check.base58ToBytes(from);
+    } catch (Exception e) {
+      throw new Exception("ERROR: sender address invalid ! address=" + from);
+    }
+    // 检查钱包地址是否合法
+    try {
+      Base58Check.base58ToBytes(to);
+    } catch (Exception e) {
+      throw new Exception("ERROR: receiver address invalid ! address=" + to);
+    }
+    if (amount < 1) {
+      throw new Exception("ERROR: amount invalid ! ");
+    }
     Blockchain blockchain = Blockchain.createBlockchain(from);
-    Transaction transaction = Transaction.newUTXOTransaction(from, to, amount, blockchain);
+    Transaction transaction = Transaction.createUTXOTransaction(from, to, amount, blockchain);
     blockchain.mineBlock(new Transaction[]{transaction});
     RocksDBStore.getInstance().closeDB();
     System.out.println("Success!");
@@ -146,6 +200,9 @@ public class CliService {
    */
   private void help() {
     System.out.println("Usage:");
+    System.out
+        .println("  createwallet - Generates a new key-pair and saves it into the wallet file");
+    System.out.println("  printaddresses - print all wallet address");
     System.out.println("  getbalance -address ADDRESS - Get balance of ADDRESS");
     System.out.println(
         "  createblockchain -address ADDRESS - Create a blockchain and send genesis block reward to ADDRESS");
