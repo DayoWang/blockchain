@@ -22,7 +22,6 @@
   </build>
   <modules>
     <module>blockchain-block</module>
-    <module>blockchain-transaction</module>
     <module>blockchain-common</module>
     <module>blockchain-wallet</module>
     <module>blockchain-cli</module>
