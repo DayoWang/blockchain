@@ -34,7 +34,6 @@ public class TXInput {
    */
   private byte[] pubKey;
 
-
   /**
    * 检查公钥hash是否用于交易输入
    */

@@ -11,11 +11,12 @@ import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.wgy.block.model.Blockchain;
-import me.wgy.model.Wallet;
+import me.wgy.wallet.model.Wallet;
 import me.wgy.utils.BtcAddressUtils;
 import me.wgy.utils.SerializeUtils;
-import me.wgy.utils.WalletUtils;
+import me.wgy.wallet.utils.WalletUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -36,6 +37,7 @@ import org.bouncycastle.math.ec.ECPoint;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class Transaction {
 
   private static final int SUBSIDY = 10;
@@ -52,6 +54,10 @@ public class Transaction {
    * 交易输出
    */
   private TXOutput[] outputs;
+  /**
+   * 创建日期
+   */
+  private long createTime;
 
   /**
    * 计算交易信息的Hash值
@@ -79,7 +85,8 @@ public class Transaction {
     // 创建交易输出
     TXOutput txOutput = TXOutput.createTXOutput(SUBSIDY, to);
     // 创建交易
-    Transaction tx = new Transaction(null, new TXInput[]{txInput}, new TXOutput[]{txOutput});
+    Transaction tx = new Transaction(null, new TXInput[]{txInput},
+        new TXOutput[]{txOutput}, System.currentTimeMillis());
     // 设置交易ID
     tx.setTxId(tx.hash());
     return tx;
@@ -103,19 +110,20 @@ public class Transaction {
    * @param amount 交易金额
    * @param blockchain 区块链
    */
-  public static Transaction createUTXOTransaction(String from, String to, int amount,
+  public static Transaction newUTXOTransaction(String from, String to, int amount,
       Blockchain blockchain) throws Exception {
     // 获取钱包
     Wallet senderWallet = WalletUtils.getInstance().getWallet(from);
     byte[] pubKey = senderWallet.getPublicKey();
     byte[] pubKeyHash = BtcAddressUtils.ripeMD160Hash(pubKey);
 
-    SpendableOutputResult result = blockchain.findSpendableOutputs(pubKeyHash, amount);
+    SpendableOutputResult result = new UTXOSet(blockchain).findSpendableOutputs(pubKeyHash, amount);
     int accumulated = result.getAccumulated();
     Map<String, int[]> unspentOuts = result.getUnspentOuts();
 
     if (accumulated < amount) {
-      throw new Exception("ERROR: Not enough funds ! ");
+      log.error("ERROR: Not enough funds ! accumulated=" + accumulated + ", amount=" + amount);
+      throw new RuntimeException("ERROR: Not enough funds ! ");
     }
     Iterator<Map.Entry<String, int[]>> iterator = unspentOuts.entrySet().iterator();
 
@@ -136,7 +144,7 @@ public class Transaction {
       txOutput = ArrayUtils.add(txOutput, TXOutput.createTXOutput((accumulated - amount), from));
     }
 
-    Transaction newTx = new Transaction(null, txInputs, txOutput);
+    Transaction newTx = new Transaction(null, txInputs, txOutput, System.currentTimeMillis());
     newTx.setTxId(newTx.hash());
 
     // 进行交易签名
@@ -145,10 +153,10 @@ public class Transaction {
     return newTx;
   }
 
-  /**
-   * 创建用于签名的交易数据副本， 交易输入的 signature 和 pubKey 需要设置为null
-   */
 
+  /**
+   * 创建用于签名的交易数据副本，交易输入的 signature 和 pubKey 需要设置为null
+   */
   public Transaction trimmedCopy() {
     TXInput[] tmpTXInputs = new TXInput[this.getInputs().length];
     for (int i = 0; i < this.getInputs().length; i++) {
@@ -162,7 +170,7 @@ public class Transaction {
       tmpTXOutputs[i] = new TXOutput(txOutput.getValue(), txOutput.getPubKeyHash());
     }
 
-    return new Transaction(this.getTxId(), tmpTXInputs, tmpTXOutputs);
+    return new Transaction(this.getTxId(), tmpTXInputs, tmpTXOutputs, this.getCreateTime());
   }
 
 
@@ -180,7 +188,7 @@ public class Transaction {
     // 再次验证一下交易信息中的交易输入是否正确，也就是能否查找对应的交易数据
     for (TXInput txInput : this.getInputs()) {
       if (prevTxMap.get(Hex.encodeHexString(txInput.getTxId())) == null) {
-        throw new Exception("ERROR: Previous transaction is not correct");
+        throw new RuntimeException("ERROR: Previous transaction is not correct");
       }
     }
 
@@ -229,7 +237,7 @@ public class Transaction {
     // 再次验证一下交易信息中的交易输入是否正确，也就是能否查找对应的交易数据
     for (TXInput txInput : this.getInputs()) {
       if (prevTxMap.get(Hex.encodeHexString(txInput.getTxId())) == null) {
-        throw new Exception("ERROR: Previous transaction is not correct");
+        throw new RuntimeException("ERROR: Previous transaction is not correct");
       }
     }
 

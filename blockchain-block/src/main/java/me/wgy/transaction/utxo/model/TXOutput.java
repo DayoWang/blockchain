@@ -26,7 +26,6 @@ public class TXOutput {
    */
   private byte[] pubKeyHash;
 
-
   /**
    * 创建交易输出
    */

@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import me.wgy.block.consensus.PowResult;
 import me.wgy.block.consensus.ProofOfWork;
+import me.wgy.transaction.utxo.model.MerkleTree;
 import me.wgy.transaction.utxo.model.Transaction;
 import me.wgy.utils.ByteUtils;
-import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * 区块
@@ -69,8 +69,8 @@ public class Block {
   public byte[] hashTransaction() {
     byte[][] txIdArrays = new byte[this.getTransactions().length][];
     for (int i = 0; i < this.getTransactions().length; i++) {
-      txIdArrays[i] = this.getTransactions()[i].getTxId();
+      txIdArrays[i] = this.getTransactions()[i].hash();
     }
-    return DigestUtils.sha256(ByteUtils.merge(txIdArrays));
+    return new MerkleTree(txIdArrays).getRoot().getHash();
   }
 }

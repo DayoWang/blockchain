@@ -1,4 +1,4 @@
-package me.wgy.model;
+package me.wgy.wallet.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import me.wgy.utils.Base58Check;
 import me.wgy.utils.BtcAddressUtils;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
@@ -25,7 +26,10 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
  */
 @Data
 @AllArgsConstructor
+@Slf4j
 public class Wallet implements Serializable {
+
+  private static final long serialVersionUID = 166249065006236265L;
 
   /**
    * 校验码长度
@@ -50,7 +54,7 @@ public class Wallet implements Serializable {
    */
   private void initWallet() {
     try {
-      KeyPair keyPair = createECKeyPair();
+      KeyPair keyPair = newECKeyPair();
       BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
       BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
 
@@ -59,7 +63,8 @@ public class Wallet implements Serializable {
       this.setPrivateKey(privateKey);
       this.setPublicKey(publicKeyBytes);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Fail to init wallet ! ", e);
+      throw new RuntimeException("Fail to init wallet ! ", e);
     }
   }
 
@@ -67,7 +72,7 @@ public class Wallet implements Serializable {
   /**
    * 创建新的密钥对
    */
-  private KeyPair createECKeyPair() throws Exception {
+  private KeyPair newECKeyPair() throws Exception {
     // 注册 BC Provider
     Security.addProvider(new BouncyCastleProvider());
     // 创建椭圆曲线算法的密钥对生成器，算法为 ECDSA
@@ -108,20 +113,5 @@ public class Wallet implements Serializable {
       e.printStackTrace();
     }
     throw new RuntimeException("Fail to get wallet address ! ");
-  }
-
-  /**
-   * 私钥备份
-   */
-  public String backupPrivateKey() {
-    // TODO
-    return "";
-  }
-
-  /**
-   * 导入私钥
-   */
-  public void importPrivateKey() {
-    // TODO
   }
 }

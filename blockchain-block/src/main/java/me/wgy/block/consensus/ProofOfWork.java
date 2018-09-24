@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.wgy.block.model.Block;
 import me.wgy.utils.ByteUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -18,12 +19,13 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class ProofOfWork {
 
   /**
    * 难度目标位
    */
-  public static final int TARGET_BITS = 20;
+  public static final int TARGET_BITS = 16;
 
   /**
    * 区块
@@ -34,13 +36,14 @@ public class ProofOfWork {
    */
   private BigInteger target;
 
+
   /**
    * 创建新的工作量证明，设定难度目标值
    * <p>
    * 对1进行移位运算，将1向左移动 (256 - TARGET_BITS) 位，得到我们的难度目标值
    */
   public static ProofOfWork createProofOfWork(Block block) {
-    BigInteger targetValue = BigInteger.ONE.shiftLeft((256 - TARGET_BITS));
+    BigInteger targetValue = BigInteger.valueOf(1).shiftLeft((256 - TARGET_BITS));
     return new ProofOfWork(block, targetValue);
   }
 
@@ -52,12 +55,13 @@ public class ProofOfWork {
     String shaHex = "";
     long startTime = System.currentTimeMillis();
     while (nonce < Long.MAX_VALUE) {
+      log.info("POW running, nonce=" + nonce);
       byte[] data = this.prepareData(nonce);
       shaHex = DigestUtils.sha256Hex(data);
       if (new BigInteger(shaHex, 16).compareTo(this.target) == -1) {
-        System.out.printf("Elapsed Time: %s seconds \n",
-            (float) (System.currentTimeMillis() - startTime) / 1000);
-        System.out.printf("correct hash Hex: %s \n\n", shaHex);
+        log.info("Elapsed Time: {} seconds \n",
+            new Object[]{(float) (System.currentTimeMillis() - startTime) / 1000});
+        log.info("correct hash Hex: {} \n", new Object[]{shaHex});
         break;
       } else {
         nonce++;
@@ -92,7 +96,6 @@ public class ProofOfWork {
         ByteUtils.toBytes(TARGET_BITS),
         ByteUtils.toBytes(nonce)
     );
-
   }
 
 }

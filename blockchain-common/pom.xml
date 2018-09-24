@@ -33,6 +33,7 @@
       <version>4.0.2</version>
     </dependency>
 
+    <!-- 加密算法 -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
