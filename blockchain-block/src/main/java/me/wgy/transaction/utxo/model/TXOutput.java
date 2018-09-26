@@ -4,7 +4,9 @@ import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.wgy.utils.Base58Check;
+import me.wgy.transaction.script.model.Script;
+import me.wgy.transaction.script.model.ScriptBuilder;
+import me.wgy.utils.BtcAddressUtils;
 
 /**
  * 交易输出
@@ -25,15 +27,24 @@ public class TXOutput {
    * 公钥Hash
    */
   private byte[] pubKeyHash;
+  /**
+   * p2pkh脚本
+   */
+  private Script p2pkhScript;
+
+  public TXOutput(int value, byte[] pubKeyHash) {
+    this.value = value;
+    this.pubKeyHash = pubKeyHash;
+    this.p2pkhScript = ScriptBuilder.createOutputScript(pubKeyHash);
+  }
 
   /**
    * 创建交易输出
    */
   public static TXOutput createTXOutput(int value, String address) {
-    // 反向转化为 byte 数组
-    byte[] versionedPayload = Base58Check.base58ToBytes(address);
-    byte[] pubKeyHash = Arrays.copyOfRange(versionedPayload, 1, versionedPayload.length);
-    return new TXOutput(value, pubKeyHash);
+    byte[] pubKeyHash = BtcAddressUtils.getRipeMD160Hash(address);
+    Script p2pkhScript = ScriptBuilder.createOutputScript(pubKeyHash);
+    return new TXOutput(value, pubKeyHash, p2pkhScript);
   }
 
   /**

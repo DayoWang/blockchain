@@ -13,9 +13,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.wgy.block.model.Blockchain;
-import me.wgy.wallet.model.Wallet;
+import me.wgy.transaction.script.model.ScriptBuilder;
 import me.wgy.utils.BtcAddressUtils;
 import me.wgy.utils.SerializeUtils;
+import me.wgy.wallet.model.Wallet;
 import me.wgy.wallet.utils.WalletUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -161,7 +162,8 @@ public class Transaction {
     TXInput[] tmpTXInputs = new TXInput[this.getInputs().length];
     for (int i = 0; i < this.getInputs().length; i++) {
       TXInput txInput = this.getInputs()[i];
-      tmpTXInputs[i] = new TXInput(txInput.getTxId(), txInput.getTxOutputIndex(), null, null);
+      tmpTXInputs[i] = new TXInput(txInput.getTxId(), txInput.getTxOutputIndex(), null,
+          txInput.getPubKey());
     }
 
     TXOutput[] tmpTXOutputs = new TXOutput[this.getOutputs().length];
@@ -212,13 +214,17 @@ public class Transaction {
       txCopy.setTxId(txCopy.hash());
       txInputCopy.setPubKey(null);
 
-      // 对整个交易信息仅进行签名，即对交易ID进行签名
+      // 对整个交易信息进行签名，即对交易ID进行签名
       ecdsaSign.update(txCopy.getTxId());
       byte[] signature = ecdsaSign.sign();
 
       // 将整个交易数据的签名赋值给交易输入，因为交易输入需要包含整个交易信息的签名
       // 注意是将得到的签名赋值给原交易信息中的交易输入
       this.getInputs()[i].setSignature(signature);
+      this.getInputs()[i].setScriptSig(
+          ScriptBuilder.createInputScript(signature, prevTxOutput.getPubKeyHash()));
+
+
     }
   }
 
@@ -257,6 +263,8 @@ public class Transaction {
       // 获取交易输入所对应的上一笔交易中的交易输出
       TXOutput prevTxOutput = prevTx.getOutputs()[txInput.getTxOutputIndex()];
 
+      TXInput.verify(prevTxOutput);
+
       TXInput txInputCopy = txCopy.getInputs()[i];
       txInputCopy.setSignature(null);
       txInputCopy.setPubKey(prevTxOutput.getPubKeyHash());
@@ -264,7 +272,7 @@ public class Transaction {
       txCopy.setTxId(txCopy.hash());
       txInputCopy.setPubKey(null);
 
-      // 使用椭圆曲线 x,y 点去生成公钥Key
+      // 根据椭圆曲线 x,y 点去生成公钥Key
       BigInteger x = new BigInteger(1, Arrays.copyOfRange(txInput.getPubKey(), 1, 33));
       BigInteger y = new BigInteger(1, Arrays.copyOfRange(txInput.getPubKey(), 33, 65));
       ECPoint ecPoint = ecParameters.getCurve().createPoint(x, y);

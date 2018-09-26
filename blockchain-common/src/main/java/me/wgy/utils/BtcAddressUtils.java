@@ -13,6 +13,11 @@ import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 public class BtcAddressUtils {
 
   /**
+   * 公钥 RIPEMD160 Hash 长度
+   */
+  public static final int LENGTH = 20;
+
+  /**
    * 双重Hash
    */
   public static byte[] doubleHash(byte[] data) {
@@ -40,5 +45,13 @@ public class BtcAddressUtils {
    */
   public static byte[] checksum(byte[] payload) {
     return Arrays.copyOfRange(doubleHash(payload), 0, 4);
+  }
+
+  /**
+   * 从比特币地址中获取 RIPEMD160 Hash 值
+   */
+  public static byte[] getRipeMD160Hash(String address) {
+    byte[] versionedPayload = Base58Check.base58ToBytes(address);
+    return Arrays.copyOfRange(versionedPayload, 1, versionedPayload.length);
   }
 }

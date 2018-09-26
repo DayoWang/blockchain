@@ -11,7 +11,6 @@ import me.wgy.block.store.RocksDBStore;
 import me.wgy.transaction.utxo.model.TXInput;
 import me.wgy.transaction.utxo.model.TXOutput;
 import me.wgy.transaction.utxo.model.Transaction;
-import me.wgy.utils.ByteUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +29,6 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 public class Blockchain {
 
   private String lastBlockHash;
-
 
   /**
    * 从 DB 中恢复区块链数据
@@ -92,7 +90,6 @@ public class Blockchain {
     this.lastBlockHash = block.getHash();
   }
 
-
   /**
    * 区块链迭代器
    */
@@ -108,7 +105,7 @@ public class Blockchain {
      * 是否有下一个区块
      */
     public boolean hashNext() {
-      if (ByteUtils.ZERO_HASH.equals(currentBlockHash)) {
+      if (StringUtils.isBlank(currentBlockHash)) {
         return false;
       }
       Block lastBlock = RocksDBStore.getInstance().getBlock(currentBlockHash);
@@ -116,11 +113,12 @@ public class Blockchain {
         return false;
       }
       // 创世区块直接放行
-      if (ByteUtils.ZERO_HASH.equals(lastBlock.getPrevBlockHash())) {
+      if (lastBlock.getPrevBlockHash().length() == 0) {
         return true;
       }
       return RocksDBStore.getInstance().getBlock(lastBlock.getPrevBlockHash()) != null;
     }
+
 
     /**
      * 返回区块
@@ -141,7 +139,6 @@ public class Blockchain {
   public BlockchainIterator getBlockchainIterator() {
     return new BlockchainIterator(lastBlockHash);
   }
-
 
   /**
    * 查找所有的 unspent transaction outputs

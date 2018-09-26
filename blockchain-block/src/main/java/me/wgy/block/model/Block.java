@@ -9,7 +9,7 @@ import me.wgy.block.consensus.PowResult;
 import me.wgy.block.consensus.ProofOfWork;
 import me.wgy.transaction.utxo.model.MerkleTree;
 import me.wgy.transaction.utxo.model.Transaction;
-import me.wgy.utils.ByteUtils;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * 区块
@@ -22,6 +22,8 @@ import me.wgy.utils.ByteUtils;
 @NoArgsConstructor
 @ToString
 public class Block {
+
+  private static final String ZERO_HASH = Hex.encodeHexString(new byte[32]);
 
   /**
    * 区块hash值
@@ -48,7 +50,7 @@ public class Block {
    * <p> 创建创世区块 </p>
    */
   public static Block createGenesisBlock(Transaction coinbase) {
-    return Block.createBlock(ByteUtils.ZERO_HASH, new Transaction[]{coinbase});
+    return Block.createBlock(ZERO_HASH, new Transaction[]{coinbase});
   }
 
   /**

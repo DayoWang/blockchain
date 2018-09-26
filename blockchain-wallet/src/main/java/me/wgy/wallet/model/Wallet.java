@@ -85,7 +85,6 @@ public class Wallet implements Serializable {
     return keyPairGenerator.generateKeyPair();
   }
 
-
   /**
    * 获取钱包地址
    */
@@ -110,8 +109,8 @@ public class Wallet implements Serializable {
       // 5. 执行Base58转换处理
       return Base58Check.rawBytesToBase58(binaryAddress);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Fail to get wallet address !", e);
+      throw new RuntimeException("Fail to get wallet address ! ", e);
     }
-    throw new RuntimeException("Fail to get wallet address ! ");
   }
 }

@@ -16,7 +16,6 @@ public class Base58Check {
   /**
    * 添加校验码并转化为 Base58 字符串
    */
-
   public static String bytesToBase58(byte[] data) {
     return rawBytesToBase58(addCheckHash(data));
   }
