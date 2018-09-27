@@ -84,7 +84,6 @@ public class UTXOSet {
     return utxos;
   }
 
-
   /**
    * 重建 UTXO 池索引
    */
@@ -93,9 +92,11 @@ public class UTXOSet {
     log.info("Start to reIndex UTXO set !");
     RocksDBStore.getInstance().cleanChainStateBucket();
     Map<String, TXOutput[]> allUTXOs = blockchain.findAllUTXOs();
+    Map<String, byte[]> allUTXOBytes = Maps.newHashMap();
     for (Map.Entry<String, TXOutput[]> entry : allUTXOs.entrySet()) {
-      RocksDBStore.getInstance().putUTXOs(entry.getKey(), entry.getValue());
+      allUTXOBytes.put(entry.getKey(), SerializeUtils.serialize(entry.getValue()));
     }
+    RocksDBStore.getInstance().initAllUTXOs(allUTXOBytes);
     log.info("ReIndex UTXO set finished ! ");
   }
 

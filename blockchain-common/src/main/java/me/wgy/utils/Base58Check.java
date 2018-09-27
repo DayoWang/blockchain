@@ -115,4 +115,5 @@ public class Base58Check {
 
   private Base58Check() {
   }  // Not instantiable
+
 }

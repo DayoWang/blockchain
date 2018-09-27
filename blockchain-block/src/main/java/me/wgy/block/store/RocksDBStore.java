@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.wgy.block.model.Block;
 import me.wgy.transaction.utxo.model.TXOutput;
 import me.wgy.utils.SerializeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
@@ -163,9 +164,23 @@ public class RocksDBStore {
     if (blockBytes != null) {
       return (Block) SerializeUtils.deserialize(blockBytes);
     }
-    throw new RuntimeException("Fail to get block ! blockHash=" + blockHash);
+    throw new RuntimeException("Fail to get block , don`t exist ! blockHash=" + blockHash);
   }
 
+  /**
+   * 获取最新一个区块
+   */
+  public Block getLastBlock() {
+    String lastBlockHash = getLastBlockHash();
+    if (StringUtils.isBlank(lastBlockHash)) {
+      throw new RuntimeException("ERROR: Fail to get last block hash ! ");
+    }
+    Block lastBlock = getBlock(lastBlockHash);
+    if (lastBlock == null) {
+      throw new RuntimeException("ERROR: Fail to get last block ! ");
+    }
+    return lastBlock;
+  }
 
   /**
    * 清空chainstate bucket
@@ -176,6 +191,20 @@ public class RocksDBStore {
     } catch (Exception e) {
       log.error("Fail to clear chainstate bucket ! ", e);
       throw new RuntimeException("Fail to clear chainstate bucket ! ", e);
+    }
+  }
+
+  /**
+   * 一次性放入所有UTXO数据
+   */
+  public void initAllUTXOs(Map<String, byte[]> utxoDatas) {
+    try {
+      chainstateBucket.putAll(utxoDatas);
+      db.put(SerializeUtils.serialize(CHAINSTATE_BUCKET_KEY),
+          SerializeUtils.serialize(chainstateBucket));
+    } catch (RocksDBException e) {
+      log.error("Fail to init all UTXOs data into chainstate bucket ! ", e);
+      throw new RuntimeException("Fail to init all UTXOs data into chainstate bucket ! ", e);
     }
   }
 
@@ -195,7 +224,6 @@ public class RocksDBStore {
       throw new RuntimeException("Fail to put UTXOs into chainstate bucket ! key=" + key, e);
     }
   }
-
 
   /**
    * 查询UTXO数据

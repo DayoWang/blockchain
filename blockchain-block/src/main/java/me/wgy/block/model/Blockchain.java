@@ -1,7 +1,9 @@
 package me.wgy.block.model;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +13,7 @@ import me.wgy.block.store.RocksDBStore;
 import me.wgy.transaction.utxo.model.TXInput;
 import me.wgy.transaction.utxo.model.TXOutput;
 import me.wgy.transaction.utxo.model.Transaction;
+import me.wgy.utils.ByteUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +33,7 @@ public class Blockchain {
 
   private String lastBlockHash;
 
+
   /**
    * 从 DB 中恢复区块链数据
    */
@@ -40,6 +44,7 @@ public class Blockchain {
     }
     return new Blockchain(lastBlockHash);
   }
+
 
   /**
    * <p> 创建区块链 </p>
@@ -71,12 +76,8 @@ public class Blockchain {
         throw new RuntimeException("ERROR: Fail to mine block ! Invalid transaction ! ");
       }
     }
-    String lastBlockHash = RocksDBStore.getInstance().getLastBlockHash();
-    if (lastBlockHash == null) {
-      throw new RuntimeException("ERROR: Fail to get last block hash ! ");
-    }
-
-    Block block = Block.createBlock(lastBlockHash, transactions);
+    Block lastBlock = RocksDBStore.getInstance().getLastBlock();
+    Block block = Block.createBlock(lastBlockHash, transactions, lastBlock.getHeight() + 1);
     this.addBlock(block);
     return block;
   }
@@ -89,6 +90,25 @@ public class Blockchain {
     RocksDBStore.getInstance().putBlock(block);
     this.lastBlockHash = block.getHash();
   }
+
+  /**
+   * <p> 添加区块  </p>
+   */
+  public void saveBlock(Block block) {
+    Block existBlock = RocksDBStore.getInstance().getBlock(block.getHash());
+    if (existBlock != null) {
+      return;
+    }
+    // 保存区块数据
+    RocksDBStore.getInstance().putBlock(block);
+    Block lastBlock = RocksDBStore.getInstance().getLastBlock();
+
+    if (block.getHeight() > lastBlock.getHeight()) {
+      RocksDBStore.getInstance().putLastBlockHash(block.getHash());
+      this.lastBlockHash = block.getHash();
+    }
+  }
+
 
   /**
    * 区块链迭代器
@@ -105,7 +125,7 @@ public class Blockchain {
      * 是否有下一个区块
      */
     public boolean hashNext() {
-      if (StringUtils.isBlank(currentBlockHash)) {
+      if (ByteUtils.ZERO_HASH.equals(currentBlockHash)) {
         return false;
       }
       Block lastBlock = RocksDBStore.getInstance().getBlock(currentBlockHash);
@@ -113,12 +133,11 @@ public class Blockchain {
         return false;
       }
       // 创世区块直接放行
-      if (lastBlock.getPrevBlockHash().length() == 0) {
+      if (ByteUtils.ZERO_HASH.equals(lastBlock.getPrevBlockHash())) {
         return true;
       }
       return RocksDBStore.getInstance().getBlock(lastBlock.getPrevBlockHash()) != null;
     }
-
 
     /**
      * 返回区块
@@ -243,7 +262,7 @@ public class Blockchain {
   /**
    * 交易签名验证
    */
-  private boolean verifyTransactions(Transaction tx) {
+  public boolean verifyTransactions(Transaction tx) {
     if (tx.isCoinbase()) {
       return true;
     }
@@ -258,5 +277,33 @@ public class Blockchain {
       log.error("Fail to verify transaction ! transaction invalid ! ", e);
       throw new RuntimeException("Fail to verify transaction ! transaction invalid ! ", e);
     }
+  }
+
+  /**
+   * 获取本地节点区块的最大高度
+   */
+  public long getBestHeight() {
+    Block lastBlock = RocksDBStore.getInstance().getLastBlock();
+    return lastBlock.getHeight();
+  }
+
+  /**
+   * 获取区块链中所有区块的hash值
+   */
+  public List<String> getAllBlockHash() {
+    List<String> blockHashes = Lists.newArrayList();
+    for (BlockchainIterator blockchainIterator = this.getBlockchainIterator();
+        blockchainIterator.hashNext(); ) {
+      Block block = blockchainIterator.next();
+      blockHashes.add(block.getHash());
+    }
+    return blockHashes;
+  }
+
+  /**
+   * 根据hash查询区块
+   */
+  public Block getBlockByHash(String hash) {
+    return RocksDBStore.getInstance().getBlock(hash);
   }
 }
