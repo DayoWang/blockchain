@@ -55,9 +55,9 @@ public class Blockchain {
     String lastBlockHash = RocksDBStore.getInstance().getLastBlockHash();
     if (StringUtils.isBlank(lastBlockHash)) {
       // 创建 coinBase 交易
-      String genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
-      Transaction coinbaseTX = Transaction.createCoinbaseTX(address, genesisCoinbaseData);
-      Block genesisBlock = Block.createGenesisBlock(coinbaseTX);
+      String genesisCoinBaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
+      Transaction coinBaseTX = Transaction.createCoinbaseTX(address, genesisCoinBaseData);
+      Block genesisBlock = Block.createGenesisBlock(coinBaseTX);
       lastBlockHash = genesisBlock.getHash();
       RocksDBStore.getInstance().putBlock(genesisBlock);
       RocksDBStore.getInstance().putLastBlockHash(lastBlockHash);
