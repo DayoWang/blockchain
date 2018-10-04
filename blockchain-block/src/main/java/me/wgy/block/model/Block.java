@@ -51,8 +51,8 @@ public class Block {
   /**
    * <p> 创建创世区块 </p>
    */
-  public static Block createGenesisBlock(Transaction coinbase) {
-    return Block.createBlock(ByteUtils.ZERO_HASH, new Transaction[]{coinbase}, 0);
+  public static Block createGenesisBlock(Transaction coinBase) {
+    return Block.createBlock(ByteUtils.ZERO_HASH, new Transaction[]{coinBase}, 0);
   }
 
   /**
