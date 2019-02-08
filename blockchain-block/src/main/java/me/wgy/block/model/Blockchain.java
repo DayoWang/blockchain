@@ -92,7 +92,7 @@ public class Blockchain {
   }
 
   /**
-   * <p> 添加区块  </p>
+   * <p> 保存区块  </p>
    */
   public void saveBlock(Block block) {
     Block existBlock = RocksDBStore.getInstance().getBlock(block.getHash());
