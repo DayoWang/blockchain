@@ -1,2 +1,3 @@
-#Java implementation of blockchain
-##PoW Consensus
+Java implementation of blockchain
+
+PoW Consensus
